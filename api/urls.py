@@ -1,3 +1,6 @@
 from django.urls import path
+from .import views
 
-urlpatterns = []
+urlpatterns = [
+    path('get-blog-post/', views.get_blog_post),
+]
