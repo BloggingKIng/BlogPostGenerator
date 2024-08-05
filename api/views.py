@@ -1,13 +1,20 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import status
 import google.generativeai as genai
 from django.conf import settings
 import os
+import re
 # Create your views here.
 api_key = os.getenv('API_KEY')
 gemini = genai.configure(api_key=api_key)
 model = genai.GenerativeModel('gemini-1.5-pro')
+
+def format_html(content):
+    html_text = re.sub('```html', '<html>', content)
+    html_text = re.sub('```', '', html_text)
+    return html_text
 
 defaultHistory =  [
      {
@@ -117,13 +124,11 @@ def get_blog_post(request):
         response = chat.send_message(prompt)
         print(response)
         print(chat.history)
+
+        data = {}
+        data['blog_post'] = format_html(response.text)
+        data['blog_title'] = blogpost_title
         
-        with open(os.path.join(os.getcwd(),f'{blogpost_title}.html'),'w+') as file:
-            lines = response.text.strip().split('\n')
-            for line in lines:
-                file.write(line + '\n')
-
-
-        return Response("Success")
+        return Response(data, status=status.HTTP_200_OK)
 
         

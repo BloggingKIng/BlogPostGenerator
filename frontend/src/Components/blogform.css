@@ -19,10 +19,11 @@
     margin: 50px auto;
 }
 
-.form-g input {
+.form-g input, .form-g select {
     outline: 2px solid #656565 !important;
     font-size: 20px;
     border: 0px !important;
+    font-family: 'Indie Flower', cursive;
 }
 
 .form-g label {
@@ -30,6 +31,48 @@
     font-size: 25px;
 }
 
-.form-control:focus {
-    box-shadow: none !important;
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(101, 101, 101, 0.5) !important;
+}
+
+.form-g input[type="range"] {
+    width: 100%;
+    /* border: 0px !important; */
+    outline: 0px !important;
+    margin-top: 10px;
+}
+
+.range-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+#sections, .sub-secs-range {
+    width: 10%;
+    text-align: center;
+    font-family: 'Permanent Marker', cursive;
+    margin-left: 30px;
+}
+
+.sections-detail-container {
+    display: flex;
+}
+
+.sections-detail-container select {
+    width: 20%;
+    text-align: center;
+    font-family: 'Permanent Marker', cursive;
+    border-radius: 0px !important;
+}
+
+.sections-detail-container input {
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.subs-container {
+    display: flex;
+    justify-content: space-between;
+    width: 10%;
+    text-align: center;
 }
