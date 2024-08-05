@@ -1,28 +1,44 @@
 import { useEffect, useState } from "react";
-import { Container, Form } from "react-bootstrap";
+import { Container, Form, Button } from "react-bootstrap";
+import axios from "axios";
 import './blogform.css';
+
 
 export default function BlogGenerationForm() {
     const [blogTitle, setBlogTitle] = useState("");
     const [sections, setSections] = useState(1);
     const [sectionsData, setSectionsData] = useState([]);
+    const [blogDescription, setBlogDescription] = useState("");
+    const [resultHtml, setResultHtml] = useState("");
 
     useEffect(() => {
-        const arr = Array.from({ length: sections }, () => ({
-            heading: "",
-            type: "h1",
-            subSectionsNum: 0,
-            subSections: []
-        }));
-        setSectionsData(arr);
+        if (sections > sectionsData.length) {
+            setSectionsData(prevSectionsData => [...prevSectionsData, { heading: "", type: "", subSectionsNum: 0, subSections: [] }]);
+        }
+        if (sections < sectionsData.length) {
+            setSectionsData(prevSectionsData => prevSectionsData.slice(0, sections));
+        }
     }, [sections]);
 
     const handleChange = (sectionIndex, heading, type, subSectionsNum) => {
-        const newSectionsData = [...sectionsData];
-        const section = { ...newSectionsData[sectionIndex], heading, type, subSectionsNum };
-        newSectionsData[sectionIndex] = section;
-        setSectionsData(newSectionsData);
+        setSectionsData(prevSectionsData => {
+            const newSectionsData = [...prevSectionsData];
+            const section = { ...newSectionsData[sectionIndex] };
+            section.heading = heading;
+            section.type = type;
+            section.subSectionsNum = subSectionsNum;
+            const newSubSections = [...section.subSections];
+            if (subSectionsNum > newSubSections.length) {
+                newSubSections.push(...Array(subSectionsNum - newSubSections.length).fill(""));
+            } else {
+                newSubSections.splice(subSectionsNum);
+            }
+            section.subSections = newSubSections;
+            newSectionsData[sectionIndex] = section;
+            return newSectionsData;
+        });
     };
+    
 
     const handleChangeSubSection = (sectionIndex, subSectionIndex, subSection) => {
         const newSectionsData = [...sectionsData];
@@ -34,9 +50,49 @@ export default function BlogGenerationForm() {
         setSectionsData(newSectionsData);
     };
 
-    useEffect(() => {
+    const handleGenerate = async() => {
         console.log(sectionsData);
-    }, [sectionsData]);
+        const processedData = []
+        for (let data of sectionsData) {
+            processedData.push({
+                heading: [data.heading, data.headingType],
+                subheadings: data.subSections.map(subSection => [subSection, "h3 or h4"]),
+                info:''
+            })
+        }
+        await 
+            axios.post('http://127.0.0.1:8000/api/get-blog-post/', 
+                {title: blogTitle, sections: processedData, info: blogDescription}
+            )
+            .then((response) => {
+                setResultHtml(response.data)
+                console.log(response.data)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
+    if (resultHtml !== "") {
+        return (
+            <Container className="content-container">
+                <Container>
+                    <h1 className="text-center hd">AI Blog Writer</h1>
+                    <p className="text-center hd-desc">
+                        Give us the outline of your blog post, and we will write it for you.
+                    </p>
+                </Container>
+                <hr />
+                <Container className="result-container">
+                    <div dangerouslySetInnerHTML={{ __html: resultHtml.blog_post }} />
+                </Container>
+                <Container style={{display:'flex', justifyContent:'center', marginBottom:'30px'}}>
+                    <Button variant="secondary" size="lg" onClick={() => window.location.reload()}>Write a new post!</Button>
+                </Container>
+            </Container>
+        )
+    }
+
 
     return (
         <Container className="content-container">
@@ -55,7 +111,21 @@ export default function BlogGenerationForm() {
                             value={blogTitle}
                             onChange={(e) => setBlogTitle(e.target.value)}
                             placeholder="Enter the blog title!"
+                            required
                         />
+                        {blogTitle !== "" && 
+                            (
+                                <Container className="mt-3" style={{margin:'0', padding:'0'}}>
+                                    <Form.Label>Info: </Form.Label>
+                                    <Form.Control 
+                                        type="text" 
+                                        placeholder="Give the AI writer some instructions if you want!"  
+                                        value={blogDescription}
+                                        onChange={(e) => setBlogDescription(e.target.value)}
+                                    />
+                                </Container>
+                            )
+                        }
                     </Form.Group>
                     {blogTitle !== "" && (
                         <Container>
@@ -87,6 +157,7 @@ export default function BlogGenerationForm() {
                                                 onChange={(e) =>
                                                     handleChange(i, e.target.value, section.type, section.subSectionsNum)
                                                 }
+                                                required
                                             />
                                             <Form.Select
                                                 id={`sec-${i + 1}-type`}
@@ -135,6 +206,7 @@ export default function BlogGenerationForm() {
                                                     id={`sub-sec-${j + 1}`}
                                                     value={section.subSections[j] || ""}
                                                     onChange={(e) => handleChangeSubSection(i, j, e.target.value)}
+                                                    required
                                                 />
                                             </Form.Group>
                                         </Container>
@@ -145,6 +217,18 @@ export default function BlogGenerationForm() {
                         </Container>
                     )}
                 </Form>
+                {
+                    blogTitle !== "" && (
+                        <Container type="submit" className="text-center" style={{marginTop:'-30px', marginBottom:'30px'}}>
+                            <Button
+                                variant="primary"
+                                onClick={handleGenerate}
+                            >
+                                Generate
+                            </Button>
+                        </Container>
+                    )
+                }
             </Container>
         </Container>
     );
