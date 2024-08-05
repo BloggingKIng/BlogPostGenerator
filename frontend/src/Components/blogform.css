@@ -76,3 +76,20 @@
     width: 10%;
     text-align: center;
 }
+
+.sub-sec-label {
+    font-family: Indie Flower, cursive !important;
+}
+
+.sub-sec-label + input {
+    width: 50%;
+    outline: 1px solid #656565 !important;
+}
+
+.form-sub {
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+    flex-direction: column;
+    align-items: center;
+}
