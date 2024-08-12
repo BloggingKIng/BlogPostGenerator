@@ -1,0 +1,8 @@
+.nav-btns {
+    width: fit-content;
+}
+
+.nav-btns > * {
+    margin-left: 10px;
+    margin-right: 10px;
+}
