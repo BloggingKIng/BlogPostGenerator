@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Container, Form, Button } from "react-bootstrap";
+import { useLogin } from "../loginContext";
 import axios from "axios";
 import './blogform.css';
 
@@ -10,6 +11,7 @@ export default function BlogGenerationForm() {
     const [sectionsData, setSectionsData] = useState([]);
     const [blogDescription, setBlogDescription] = useState("");
     const [resultHtml, setResultHtml] = useState("");
+    const {isLogin, setIsLogin, setToken, token} = useLogin()
 
     useEffect(() => {
         if (sections > sectionsData.length) {
@@ -71,6 +73,12 @@ export default function BlogGenerationForm() {
             .catch((error) => {
                 console.log(error);
             });
+    }
+
+    if (!isLogin) {
+        return(<Container style={{marginTop:'50px'}}>
+            <h1 className="text-center hd">Please login before continuing!</h1>
+        </Container>)
     }
 
     if (resultHtml !== "") {
